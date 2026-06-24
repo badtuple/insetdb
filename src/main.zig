@@ -165,11 +165,13 @@ const Repl = struct {
         try self.stdout.writeStreamingAll(self.io, output);
     }
 
-    fn read_input(self: *Repl) ![]u8 {
+    /// read_input returns the next line of input excluding the delimiter. A
+    /// `null` return signals end-of-stream (e.g. the user pressed Ctrl-D).
+    fn read_input(self: *Repl) !?[]u8 {
         // TODO: just store reader directly on struct and reuse. Just leaving it
         // here while moving things around.
         var reader = self.stdin.reader(self.io, &self.buf);
-        return try reader.interface.takeDelimiter('\n') orelse &.{};
+        return try reader.interface.takeDelimiter('\n');
     }
 
     fn shutdown(self: *Repl) void {
@@ -208,7 +210,11 @@ pub fn main(init: std.process.Init) !void {
     // least then we could identify a logic bug causing a busy loop.
     while (!repl.event_loop_done) {
         try repl.print_prompt();
-        const input = try repl.read_input();
+        const input = try repl.read_input() orelse {
+            // End-of-stream. Treating it as an explicit exit.
+            repl.shutdown();
+            continue;
+        };
 
         if (input.len == 0) {
             continue;
