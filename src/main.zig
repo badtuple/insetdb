@@ -140,21 +140,26 @@ const Repl = struct {
     buf: [constants.repl_buffer_size]u8,
     stdin: std.Io.File,
     stdout: std.Io.File,
+    stdin_reader: std.Io.File.Reader,
 
     // Used to signal that the repl should close.
     event_loop_done: bool,
 
-    fn init(io: Io, allocator: std.mem.Allocator) Repl {
-        return .{
+    fn init(self: *Repl, io: Io, allocator: std.mem.Allocator) void {
+        self.* = .{
             .io = io,
             .allocator = allocator,
 
             .buf = undefined,
             .stdin = std.Io.File.stdin(),
             .stdout = std.Io.File.stdout(),
+            // Set below, once `buf`'s address is stable.
+            .stdin_reader = undefined,
 
             .event_loop_done = false,
         };
+
+        self.stdin_reader = self.stdin.reader(io, &self.buf);
     }
 
     fn print_prompt(self: *Repl) !void {
@@ -168,10 +173,7 @@ const Repl = struct {
     /// read_input returns the next line of input excluding the delimiter. A
     /// `null` return signals end-of-stream (e.g. the user pressed Ctrl-D).
     fn read_input(self: *Repl) !?[]u8 {
-        // TODO: just store reader directly on struct and reuse. Just leaving it
-        // here while moving things around.
-        var reader = self.stdin.reader(self.io, &self.buf);
-        return try reader.interface.takeDelimiter('\n');
+        return try self.stdin_reader.interface.takeDelimiter('\n');
     }
 
     fn shutdown(self: *Repl) void {
@@ -186,8 +188,9 @@ pub fn main(init: std.process.Init) !void {
     var alloc = StaticAllocator.init(init.gpa);
     const gpa = alloc.allocator();
 
-    // Initialize all components
-    var repl = Repl.init(init.io, gpa);
+    // Initialize all components.
+    var repl: Repl = undefined;
+    repl.init(init.io, gpa);
 
     // Freeze allocator.
     alloc.transition_to_static();
