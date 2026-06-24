@@ -3,3 +3,94 @@ insetdb
 
 An embedded database specially made to fit your data and hold it snuggly.
 
+
+Purpose
+-------
+
+It'd be nice if I could make this a real thing, but for now it's an experiment
+to:
+
+  - Learn more about Database internals. All my previous work has involved
+    fairly simple LSM trees and some personal variations on the WiscKey ideas
+    over a direct WAL. Supporting more relational style constructs and seeing
+    the constraints will be illuminating.
+
+  - Test TigerStyle on a larger project with more dynamic data requirements.
+    Using Zig has caused me to be infatuated by their resource management,
+    commitment to assertions, pervasive (and wildly complete!) testing
+    strategies, and design ideology.
+
+    That said, almost all projects and blogposts I've seen of people trying to
+    apply the style do this with relatively small toy projects. That's
+    completely fine. But larger projects that have to handle unexpected input,
+    non-trivial domains, and real error cases simply aren't clean in a way those
+    projects are. I want to fully commit to using it in anger and see where it
+    falls apart.
+
+    The static resource allocation, while the sexiest part of TigerStyle, also
+    seems relatively "simple" conceptually. That doesn't mean "easy" of course.
+    As with many "draw the rest of the owl" concepts, I have a feeling the real
+    barrier is uncovering a bag of tricks that allow you to work with static
+    memory in various scenarios mixed with having the constant vigilance of
+    having to actually apply them. That bag of tricks seems relatively
+    undocumented outside the TigerBeetle codebase itself and various documents
+    on hyper-local C memory management tricks.
+
+  - Learn *ALL* the safety tricks I haven't been able to justify in employment.
+    Property based testing, design-by-contract, deterministic simulation
+    testing, static analysis tools. Hell, maybe I'll actually finally pull
+    "Practical TLA+" off my bookshelf and prove some things.
+
+  - See how far I can take the idea of pushing assertions, constraints, and
+    expectations into the data layer. I have so much respect for SQLite. But my
+    personal experience has been that its flexible type system isn't just "not
+    strong enough," but actively harmful in that it gives a very false sense of
+    security. It feels like they wanted to treat everything as bytes, but their
+    hand was forced by the SQL standard.
+
+    This makes me want to see what happens if we take the opposite approach to
+    its logical extreme. What happens when we treat the database like a Type
+    System? Incredibly expressive type definitions, constraints, and assertions
+    on what your data looks like and how it behaves. That way you know exactly
+    how it looks and acts. In the same way people treat SQLite as a file format,
+    people could treat insetdb as a type spec. Just embed the db with the same
+    schema in any project you want regardless of language, and rely on its
+    assertions as a type of active specification even in incredibly dynamic
+    languages.
+
+    In a perfect world, I'd want this to enable writing your core program in
+    Rust, Zig, Haskell, Go, Idris, or whatever language best fits your needs
+    while enabling scripts, custom tooling, dashboards and other things that
+    pop up in a real production system to be written in Ruby or Perl or whatever
+    that adhoc not-quite-Lisp your coworker wrote and trusting insetdb to
+    enforce that invariants and expectations are retained.
+
+    Unfortunately, I think this vision will force me to abandon SQL. What a
+    shame. I'll cling to it as long as I can while playing around, but there's
+    really only so much you can layer on top. Perhaps I'll find a way to extend
+    just the DDL while leaving queries familiar.
+
+  - See how far I can specialize data layout based on that extra definition. Say
+    we know a column is non-null, a JSON payload, and restricted to a handful
+    of JSON Schema definitions. In theory, one could optimize storage
+    significantly rather than just encoding the JSON into a binary format and
+    stuffing it into a column. But...how do you even approach such a general
+    problem? It's probably not even worth it. But damn it'd be cool. Cool enough
+    to waste some of my funemployment time on it.
+
+  - Get better at gettin' Ziggy wit it. (Na-na, na, na, na-na-na-na)
+
+Should I use this?
+------------------
+
+Like, in a program? No.
+
+If you end up learning from it or just wanna chat about it, hit me up at
+badtuple@the.sarl. Seriously, I love talking to people. I don't think I'll be
+accepting PRs right now. I just want a fun commitment-free learning project.
+
+LLMs
+----
+
+On a learning project? For code I actually care about? No. Rest assured all bugs
+written here are free-range and organic.
