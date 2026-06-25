@@ -137,7 +137,7 @@ const Repl = struct {
     io: Io,
     allocator: std.mem.Allocator,
 
-    buf: [constants.repl_buffer_size]u8,
+    buf: []u8,
     stdin: std.Io.File,
     stdout: std.Io.File,
     stdin_reader: std.Io.File.Reader,
@@ -145,21 +145,26 @@ const Repl = struct {
     // Used to signal that the repl should close.
     event_loop_done: bool,
 
-    fn init(self: *Repl, io: Io, allocator: std.mem.Allocator) void {
+    fn init(self: *Repl, io: Io, allocator: std.mem.Allocator) !void {
         self.* = .{
             .io = io,
             .allocator = allocator,
 
-            .buf = undefined,
+            .buf = try allocator.alloc(u8, constants.repl_buffer_size),
             .stdin = std.Io.File.stdin(),
             .stdout = std.Io.File.stdout(),
-            // Set below, once `buf`'s address is stable.
+            // Set below, once `buf` is stored on `self`.
             .stdin_reader = undefined,
 
             .event_loop_done = false,
         };
 
-        self.stdin_reader = self.stdin.reader(io, &self.buf);
+        self.stdin_reader = self.stdin.reader(io, self.buf);
+    }
+
+    fn deinit(self: *Repl) void {
+        self.allocator.free(self.buf);
+        self.* = undefined;
     }
 
     fn print_prompt(self: *Repl) !void {
@@ -190,12 +195,13 @@ pub fn main(init: std.process.Init) !void {
 
     // Initialize all components.
     var repl: Repl = undefined;
-    repl.init(init.io, gpa);
+    try repl.init(init.io, gpa);
 
     // Freeze allocator.
     alloc.transition_to_static();
     defer {
         alloc.transition_to_deinit();
+        repl.deinit();
         alloc.deinit();
     }
 
