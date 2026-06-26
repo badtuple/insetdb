@@ -35,6 +35,11 @@ const constants = struct {
     /// progress. This is also relatively easy to expose as a library param
     /// with some max upper limit.
     pub const repl_buffer_size = 4 * MiB;
+    comptime {
+        // ensure repl_buffer_size is a power of 2 and not 0
+        assert(repl_buffer_size & (repl_buffer_size - 1) == 0);
+        assert(repl_buffer_size > 0);
+    }
 };
 
 /// StaticAllocator is created on program startup, allocates all heap memory
@@ -160,6 +165,9 @@ const Repl = struct {
         };
 
         self.stdin_reader = self.stdin.reader(io, self.buf);
+
+        assert(self.buf.len == constants.repl_buffer_size);
+        assert(self.event_loop_done == false);
     }
 
     fn deinit(self: *Repl) void {
@@ -182,8 +190,7 @@ const Repl = struct {
     }
 
     fn shutdown(self: *Repl) void {
-        // TODO: Cleanup. Leaving for when we have stuff to cleanup. For
-        // instance persisting repl history.
+        assert(!self.event_loop_done); // Only call shutdown once.
 
         self.event_loop_done = true;
     }
