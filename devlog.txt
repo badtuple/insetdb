@@ -1,0 +1,32 @@
+devlog
+
+Day 1. June 23 2026;
+-------------------
+
+Starting with following cstack's classic "Let's Build a Simple Database" at
+https://cstack.github.io/db_tutorial/, but in Zig instead of C and with the
+intent of following TigerStyle and making any different design decisions that
+were required in the process.
+
+I expected to cruise through things, but most of my time was spent reading the
+TigerBeetle codebase for examples of how they handled allocation and assertions.
+Ironically, creating the simple REPL harness felt the least comfortable because
+it wasn't fully clear what assertions were even needed. Design by Contract style
+assertions seem pretty clear when implementing a data structure or mid-layer API
+or a module boundary. The REPL and StaticAllocator were just thin control flow
+wrappers around IO calls and a trivial state machine that is entirely linear.
+So most assertions seemed trivial. Even in the TigerBeetle codebase they skimped
+on assertions in the same areas.
+
+It felt "wrong" to start the experiment immediately making exceptions, even if
+well reasoned.
+
+Anyway, spent maybe 4 hours and the code is...just a simple repl. The research
+was worth it though. I'm just aware that I could have burnt through half the
+tutorial if just writing my usual style and not having to research.
+
+I'll throw this all out anyway. For something like this I personally need to do
+some exploratory programming to get a sense of the design I even want. But I'll
+be entirely rewriting it when I know what I want to build. That way I can apply
+TigerStyle's design-heavy approach faithfully.
+
