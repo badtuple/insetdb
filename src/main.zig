@@ -1,5 +1,4 @@
 const std = @import("std");
-const Io = std.Io;
 const assert = std.debug.assert;
 
 const StaticAllocator = @import("StaticAllocator.zig");
@@ -70,7 +69,7 @@ pub fn main(init: std.process.Init) !void {
             continue;
         }
 
-        var statement: Statement = undefined;
+        var statement: Statement = .{ .type = undefined };
         statement.prepare(input) catch {
             try repl.print("unrecognized statement\n");
             continue;
@@ -81,6 +80,8 @@ pub fn main(init: std.process.Init) !void {
 }
 
 fn execute_statement(statement: *Statement) void {
+    assert(statement.state == .prepared);
+
     switch (statement.type) {
         .insert => return, // where we would do an insert
         .select => return, // where we would do a select
