@@ -30,7 +30,7 @@ some exploratory programming to get a sense of the design I even want. But I'll
 be entirely rewriting it when I know what I want to build. That way I can apply
 TigerStyle's design-heavy approach faithfully.
 
-Day 2. June 26 2026;
+Day 2. June 30 2026;
 -------------------
 
 Usually I keep things in 1 file until it gets unwieldy. But I realized splitting
@@ -39,3 +39,12 @@ deviation from TigerStyle: using Zig's `CamelCase.zig` convention for file
 structs meant to be used as a type. Their rationale is clear and fair. But I
 prefer the clarity over uniformity. It wouldn't bother me in a collaborative
 repo, but I'll exercise my preference here.
+
+I'm using Zig's std ascii module for prototyping convenience. The first time I
+throw everything away and rewrite things, it's worth pulling in a proper unicode
+library. Or really commiting and writing things myself but there's alot in the
+firehose and I gotta scope what I'm focusing on learning somewhere. At least
+until I can justify the rabbithole.
+
+It's annoying that Zig can't assert that something isn't undefined. That'd be
+really convenient for Statement.prepare and probably tons of other places.
